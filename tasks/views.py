@@ -4,15 +4,17 @@ from django.shortcuts import render
 from django.urls import reverse
 
 # global variable that entire application can access to.
-tasks = []
+# tasks = []
 
 class NewTaskForm(forms.Form):
     task = forms.CharField(label="New Task")
     # priority = forms.IntegerField(label="Priority", min_value=1, max_value=5)
 # Create your views here.
 def index(request):
+    if "tasks" not in request.session:
+        request.session["tasks"] = []
     return render(request, "tasks/index.html", {
-        "tasks": tasks
+        "tasks": request.session["tasks"]
     })
 def add(request):
     if request.method == "POST":
@@ -21,7 +23,7 @@ def add(request):
         if form.is_valid():
             # take data from the form
             task = form.cleaned_data["task"]
-            tasks.append(task)
+            request.session["tasks"] += [task]
             return HttpResponseRedirect(reverse("tasks:index"))
         else:
             # return exsiting data form and promopt error message to user
